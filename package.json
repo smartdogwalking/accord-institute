@@ -1,0 +1,35 @@
+{
+  "name": "accord-institute",
+  "version": "0.3.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 4180",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 4180",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "restore": "tsx scripts/backup.ts restore"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "mammoth": "^1.10.0",
+    "next": "^16.0.0",
+    "pdfjs-dist": "^6.3.289",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "yauzl": "^3.2.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/yauzl": "^2.10.3",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

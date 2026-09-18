@@ -1,0 +1,10 @@
+# Evidence requirements — version 2
+Every finding must cite one or more supplied evidence_id values. The application inserts the exact original passage for each ID; do not generate or rewrite quotations. Source blocks contain complete extracted text divided into labeled excerpts. Read all excerpts in order. Select excerpts that actually support each material proposition, condition and exception. A valid ID proves where the text came from, not that it supports your conclusion. Use source block IDs (not excerpt IDs) in open_questions.source_block_ids.
+Do not confuse source block or excerpt numbering with the agreement's own section numbering. Prefer descriptive clause names in your prose; the application displays verified source locators alongside findings. If you mention a numbered section, that label must actually occur in the referenced source block. Never infer a section number from an ID such as paragraph-4.
+
+
+EXTRACTED: the proposition is directly stated in cited text. It may paraphrase the rule, but all material conditions and exceptions must remain.
+DERIVED: the proposition joins provisions, resolves an explicit cross-reference, or organizes their combined effect. Cite each supporting rule and explain the connection. A source quote alone does not prove that an inference is valid.
+REVIEW_REQUIRED: a source-backed issue requires factual, documentary or interpretive review. Give the unresolved question, not an assumed answer. Questions about missing mechanisms with no supporting excerpt belong in open_questions, not invented evidence.
+
+Model the trigger, conditions, notice, cure, right, obligation and consequences only when supported. Do not force all stages into every scenario. A deadlock need not have a default cure period. Finding depends_on IDs must refer to other findings in this same scenario; use dependencies for prerequisites, not rhetorical sequence. Do not create cycles. A remedy being available does not mean it was exercised. Separate effectiveness from notice and prospective effects from accrued rights.

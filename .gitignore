@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.runtime/
+.private-data/
+.env*
+!.env.example
+*.tsbuildinfo
+*.log
+.DS_Store
+*.vault
+*.enc
+*.encrypted-backup.json
+*.pem
+*.key
+agreement-review.md
+vault.json
