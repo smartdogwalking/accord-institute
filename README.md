@@ -75,7 +75,7 @@ npm run build
 npm audit --audit-level=high
 ```
 
-The scoped review found and fixed two session-handling issues, with regression tests that fail against the original behavior. The current 23-test suite, TypeScript checks, production build, and dependency audit passed locally. CI repeats those checks. See [audit scope, fixes, and residual risks](docs/AUDIT.md).
+The scoped review found and fixed two session-handling issues, with regression tests that fail against the original behavior. The current 30-test suite, TypeScript checks, production build, and dependency audit passed locally. CI repeats those checks. See [audit scope, fixes, and residual risks](docs/AUDIT.md) and the [follow-up verification](docs/FOLLOW-UP-AUDIT.md).
 
 - Pinned model configuration: `gpt-5.4-2026-03-05`, medium reasoning, 16,000 output tokens per request. Pinning configuration does not make outputs deterministic or guarantee account access.
 - Imports: 15 MB; PDFs up to 150 pages; up to 400,000 extracted characters and 4,000 blocks. Analysis: 120,000 source characters plus a conservative complete-request context budget. Oversized requests fail rather than silently truncating source.

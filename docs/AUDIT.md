@@ -39,3 +39,5 @@ No real agreement, live API key, paid generation, provider connection, or client
 - Launchers and tracked source are not a deployed service. A production rollout needs a separate threat model, operational backup/recovery plan, provider/legal approval, and validated legal-quality evaluation.
 
 The model snapshot and analysis scope were intentionally preserved. There is no evidence here to justify migrating the model or claiming broader legal coverage.
+
+A subsequent [follow-up audit](FOLLOW-UP-AUDIT.md) verifies these fixes with additional session-boundary and save-conflict tests. The results above describe the initial review.
