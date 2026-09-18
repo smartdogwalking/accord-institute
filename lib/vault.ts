@@ -140,7 +140,7 @@ export class Vault {
       !this.key ||
       !this.token ||
       !token ||
-      token.length !== this.token.length ||
+      !/^[a-f0-9]{64}$/.test(token) ||
       !timingSafeEqual(Buffer.from(token), Buffer.from(this.token))
     )
       throw new AppError("Unlock your vault to continue.", 401);

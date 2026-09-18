@@ -259,6 +259,8 @@ async function handle(req: Request, ctx: Context) {
           .strict()
           .safeParse(await jsonBody(req));
         if (!parsed.success) throw new AppError("Invalid review details.");
+        // Reading a streamed body can outlive this session. Reauthorize before writing.
+        guard(req);
         const b = parsed.data,
           r = m.runs.find((r) => r.id === b.run_id),
           s = r?.results[b.scenario_id as keyof typeof r.results];

@@ -1,98 +1,86 @@
 # Accord Institute
 
-**Agreement intelligence. Grounded in the source.**
+[![Source and vault checks](https://github.com/smartdogwalking/accord-institute/actions/workflows/checks.yml/badge.svg)](https://github.com/smartdogwalking/accord-institute/actions/workflows/checks.yml)
 
-A single-user application for reviewing real-estate joint-venture agreements. Files and saved reviews live in an encrypted vault on your Mac; analysis runs through the OpenAI API using your Markdown instruction pack.
+A source-linked agreement-review workspace for real-estate joint ventures. Accord maps contractual mechanisms—funding default, major-decision deadlock, operator removal, and transfer/exit—into structured findings a legally trained reviewer can inspect, question, and correct.
 
-## Start
+**Single-user evaluation build, not a legal opinion or firm-ready deployment.** The application runs locally and encrypts saved work at rest. Generating analysis sends extracted agreement text and the instruction pack to the OpenAI API. Local storage does not mean local-only analysis.
 
-Double-click **Start Accord Institute.command** in this folder. Keep its Terminal window open. The workspace opens at **http://127.0.0.1:4180**. Use **Stop Accord Institute.command** or Control-C in the launcher window to stop it.
+Built by Maxwell D'Andrea with AI-assisted development. “Accord Institute” is the project name, not a claim of institutional accreditation or independent legal validation.
 
-On a fresh copy, install Node.js 24 or newer and run **Setup Accord Institute.command** first. Setup installs application dependencies and builds the app. No local model or model weights are installed.
+## What the project demonstrates
 
-1. Create a vault with your own passphrase of at least 14 characters. Save it in your password manager; there is no passphrase recovery service.
-2. Open **Connection & instructions**. Enter an OpenAI API key there, then **Save API key** and **Test connection**. The key is encrypted with the vault and never returned to the browser. The connection check verifies key/model access without sending an agreement; generation also requires available API credit.
-3. Import a readable PDF, Word `.docx`, or UTF-8 `.txt` agreement. Importing stays local.
-4. Compare extracted text with the original, including definitions, tables, schedules and exhibits. Confirm that check.
-5. Select **Generate analysis**. This sends the extracted source text and instructions to OpenAI. A full run makes eight sequential requests: a draft and critique for each of funding, deadlock, removal and transfer. API usage is charged to your API project. Use project spending controls while testing.
-6. Click a finding or citation to inspect the original passage. **Save changes** or **Mark reviewed** saves your separate notes and corrections. **Run history** preserves previous results and their instruction snapshots.
-7. Use **Encrypted backup** regularly.
+The design problem is not simply summarizing an agreement. A remedy may depend on notice, a cure period, an election, or an exception elsewhere in the document. Those prerequisites need to remain visible, alongside the text that supports them.
 
-The vault locks after 30 idle minutes. Locking or stopping the app interrupts an active run. **Stop analysis** retains completed scenarios. Cancellation stops local work but cannot retract a request already received by OpenAI. A new analysis creates a separate run. Only one run can be active at a time, and the connection cannot be changed during a run.
+- **Four focused review scenarios:** funding, deadlock, removal, and transfer/exit, using the agreement's own terminology.
+- **Source-linked findings:** the model selects passage IDs; the application supplies the exact imported text rather than accepting model-written quotations.
+- **Explicit uncertainty:** extracted, derived, and review-required classifications; open questions when a mechanism is uncertain or not located.
+- **Human review without rewriting history:** reviewer notes and corrections remain separate from the generated analysis; each run preserves its instruction snapshot, source hash, model identifier, and review history.
+- **Local encrypted persistence:** original files, extracted text, findings, and reviews are stored in a passphrase-derived AES-256-GCM vault. The API key is encrypted separately and excluded from exported backups.
 
-## OpenAI data terms
+## Review the engineering
 
-OpenAI's API does **not use inputs or outputs for model training by default**, unless you explicitly opt in to data sharing. Keep training/data-sharing opt-ins disabled in the API organization/project.
+| Concern | Implementation | Boundary |
+| --- | --- | --- |
+| Evidence and contractual dependencies | [analysis.ts](lib/analysis.ts), [Markdown instructions](instructions/) | Rejects unknown passage IDs, unmatched quotations, invalid dependencies, cycles, and certain unsupported section labels. Does not prove legal correctness. |
+| Draft and critique | [runner.ts](lib/runner.ts) | Up to eight sequential requests per full run; partial results and prior runs are preserved. Critique uses the same model, not an independent reviewer. |
+| Document intake | [ingest.ts](lib/ingest.ts) | PDF text-layer extraction and DOCX/TXT paragraph extraction, with size limits and warnings. No OCR or guaranteed extraction completeness. |
+| Storage and local access | [vault.ts](lib/vault.ts), [security.ts](lib/security.ts) | Encrypted files, revision checks, idle lock, session checks, and host/origin restrictions. Not a security certification. |
+| Provider boundary | [provider.ts](lib/provider.ts) | Fixed HTTPS endpoint, server-side key use, disabled response storage, bounded output, and sanitized provider errors. |
+| Verification | [tests](tests), [audit notes](docs/AUDIT.md) | 23 automated tests with synthetic material and mocked provider responses; no live-model legal-quality benchmark. |
 
-This connector uses `https://api.openai.com/v1/responses` with `store: false`, foreground requests, and no document tools, file uploads, hosted conversations, retrieval stores or web search. It sends extracted text and Markdown instructions, including a draft during the critique. It does not send the original PDF/DOCX file or your saved review notes. The API key is used only by the local server.
+The stack is TypeScript, Next.js, React, Zod, PDF.js, and Mammoth. Markdown files define the analysis charter, evidence policy, output structure, critique, and scenario-specific guidance.
 
-**No training is different from no retention.** Standard abuse-monitoring logs may include prompts/responses and normally remain for up to 30 days, with exceptions described in OpenAI's policy. Disabling stored responses does not remove these logs. Prompt caching can also retain encrypted intermediate representations for up to 24 hours under the current policy. Zero Data Retention is a separate account/project arrangement requiring eligibility and approval; this app cannot grant it or verify your contractual entitlement.
+## Evaluation workflow
 
-Use non-sensitive agreements for the current evaluation. Before confidential client use, review the actual API project's data-sharing settings, retention arrangement and applicable client/firm authorization. An API key alone does not confer Harvey's contracts, controls or assurances.
-
-Official references:
-
-- [OpenAI API data controls](https://developers.openai.com/api/docs/guides/your-data)
-- [GPT-5.4 model and snapshot](https://developers.openai.com/api/docs/models/gpt-5.4)
-- [Structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
-
-## Markdown guidance and source checks
-
-Edit `instructions/` in a text editor. The next run saves a new snapshot automatically. **Reload files** refreshes the instruction viewer.
-
-| File | Purpose |
-| --- | --- |
-| `00-system.md` | Scope, authority, document-as-evidence boundary, uncertainty |
-| `10-evidence.md` | Source passage IDs, extracted/derived/review-required classifications, prerequisites |
-| `20-output.md` | Required structured result |
-| `30-critique.md` | Second-pass review of the draft |
-| `scenarios/funding.md` | Calls, obligations, notices, cure, remedies |
-| `scenarios/deadlock.md` | Approvals, qualifying deadlock, escalation, interim operations, exits |
-| `scenarios/removal.md` | Grounds, cure, effectiveness, replacement, surviving rights |
-| `scenarios/transfer.md` | Transfer types, restrictions, exceptions, consent, exit mechanics |
-
-Each run saves the complete instructions, their SHA-256 fingerprint, original file hash, application version, pinned model identifier and context budget. Editing instructions never rewrites earlier runs.
-
-The model selects source passage IDs; the application inserts the exact original text. Unknown passages, ungrounded numbered-section labels, duplicate IDs, broken/circular prerequisites and malformed results are rejected. These checks establish structural consistency and exact quotation matching, not whether a quote supports a conclusion or whether the legal interpretation is correct. The critique uses the same model. Human review remains necessary. Amendments and related documents are not automatically collected or reconciled.
-
-## Local storage
-
-- Original files, extracted text, findings, corrections and history are encrypted in `.private-data/` using AES-256-GCM. A random salt and scrypt derive the encryption key from your passphrase. The key remains in the server process while the vault is unlocked.
-- The OpenAI key is separately encrypted in `provider-settings.enc` inside the same vault. It is excluded from exported backups and source ZIPs. Re-enter it after restoring a backup. **Remove key** removes the app's saved credential; revoke it in OpenAI if needed.
-- The server binds to `127.0.0.1:4180`. Host, origin and session checks protect local API routes. Responses are marked `no-store`. No analytics, external fonts or browser storage of documents are included. Prompts, keys and raw provider errors are not logged by this application.
-- Unlocked content exists in application/browser memory. Malware, browser extensions, other processes under your account, screenshots, OS swap and backups are outside this vault's protection. The app does not promise secure erasure or an independent security certification.
-- Downloaded originals and readable reports are ordinary **unencrypted** files. Encrypted backups still need the original vault passphrase.
-- Keep this version local. It is not configured for public hosting, shared accounts, LAN access or a firm-wide deployment.
-
-## Limits
-
-- Pinned model: `gpt-5.4-2026-03-05`, medium reasoning, 16,000 output tokens per request. Model/account availability must be verified with your own API key.
-- Maximum extracted source for analysis: 120,000 characters. A conservative 262,144-token request budget also includes instructions, schema, critique draft and output reserve. Requests may be rejected below the source limit; nothing is silently shortened.
-- Imports: 15 MB, up to 150 PDF pages, 400,000 extracted characters and 4,000 source blocks. Importing does not guarantee an agreement fits analysis.
-- PDFs need a readable text layer; no OCR. Word/TXT use paragraph locators rather than original page numbers. Extraction may omit or rearrange content, so inspect the source.
-- Each request has a ten-minute timeout. Failed scenarios show an error and preserve other completed scenarios. No automatic retries or extra model requests run in the background.
-- No redlining, amendment consolidation, external legal research, deadline automation or collaboration is included.
-
-## Backup and restore
-
-Download **Encrypted backup** while unlocked. Keep it outside this project folder and protect the passphrase separately.
-
-Restore into a **new path**, never over an existing vault:
-
-```sh
-npm run restore -- "/path/to/agreement-vault.encrypted-backup.json" "/path/to/new-vault-folder"
+```text
+Import locally → check extracted text against the original → confirm source
+    → generate draft + critique through OpenAI → validate structure and citations
+    → inspect source passages → save separate reviewer corrections
 ```
 
-Stop the app. Add `AGREEMENT_DATA_DIR=/path/to/new-vault-folder` to `.env.local`, restart, and unlock with the original passphrase. Re-enter your API key. Verify recovered documents/history before changing the old folder. The restore tool rejects path traversal and overwrites; unlocking verifies cryptographic integrity.
+Start with [the fictional sample agreement](examples/Synthetic-review-agreement.txt), not a client document. An exact source match means the passage exists in the imported text; it does not establish that it supports the generated conclusion. Amendments, related agreements, applicable law, and factual circumstances are not automatically reconciled.
 
-## Development and verification
+## Run locally
+
+Node.js 24 or newer is required:
+
+```sh
+git clone https://github.com/smartdogwalking/accord-institute.git
+cd accord-institute
+npm ci --ignore-scripts
+npm test
+npm run build
+npm start
+```
+
+Open **http://127.0.0.1:4180**. Create a vault with a 14–256-character passphrase and store that passphrase securely; there is no recovery service. Importing and inspecting documents needs no API key. For analysis, save your own OpenAI API key in **Connection & instructions** and test model access. API usage incurs charges.
+
+Mac users can instead run **Setup Accord Institute.command**, then **Start Accord Institute.command**. Keep the launcher Terminal open. **Stop Accord Institute.command** stops that launcher. Detailed operation, limits, instruction editing, and backup/restore steps are in [the operations guide](docs/OPERATIONS.md).
+
+## Confidentiality and provider disclosure
+
+The connector sends extracted text, Markdown guidance, and the draft during critique to the Responses API with `store: false`. It does not upload the original document file or send saved reviewer notes, and it does not use web search or document tools.
+
+OpenAI does not train on API data by default unless you opt in. Disabling response storage is **not** Zero Data Retention: abuse-monitoring logs may retain content for up to 30 days, subject to policy exceptions; prompt caching has separate retention. Retention arrangements require review at the actual API organization/project level. See [official OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data).
+
+Evaluate with non-sensitive material. Before client use, obtain applicable client/firm authorization and review provider terms, project settings, confidentiality obligations, retention, and security requirements. This application cannot establish privilege protection or confer another vendor's contractual controls.
+
+## Verification and limits
 
 ```sh
 npm test
 npm run typecheck
 npm run build
+npm audit --audit-level=high
 ```
 
-Tests cover vault encryption, parsing, source validation, run/review preservation, cancellation, credential storage, strict request format, disabled response storage and provider errors. Provider tests use mocked HTTP and fictional text; they do not contact OpenAI or establish legal accuracy. `scripts/qa-api.ts` is a separate QA-vault integration harness, never for a client vault.
+The scoped review found and fixed two session-handling issues, with regression tests that fail against the original behavior. The current 23-test suite, TypeScript checks, production build, and dependency audit passed locally. CI repeats those checks. See [audit scope, fixes, and residual risks](docs/AUDIT.md).
 
-The source ZIP excludes `node_modules/`, `.next/`, `.runtime/`, `.private-data/`, `.env.local`, credentials and client data. Dependencies are reinstalled with Setup on a fresh copy.
+- Pinned model configuration: `gpt-5.4-2026-03-05`, medium reasoning, 16,000 output tokens per request. Pinning configuration does not make outputs deterministic or guarantee account access.
+- Imports: 15 MB; PDFs up to 150 pages; up to 400,000 extracted characters and 4,000 blocks. Analysis: 120,000 source characters plus a conservative complete-request context budget. Oversized requests fail rather than silently truncating source.
+- No redlining, amendment consolidation, external legal research, deadline automation, collaboration, or firm-wide hosting.
+- The vault protects files at rest, not an unlocked browser/process, malware, extensions, screenshots, OS memory/swap, or readable downloads. Downloaded originals and Markdown reports are **unencrypted**.
+- Locking stops active local work. Cancellation cannot retract requests already received by the provider. Encrypted backups require the original passphrase; the API key must be re-entered after restore.
+
+The public repository contains source and synthetic fixtures, not client agreements, runtime vaults, or credentials. This was a scoped source review, not an independent penetration test, compliance assessment, or validation of legal analysis. Code is shared for review; no open-source license is granted.

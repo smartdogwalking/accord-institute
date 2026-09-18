@@ -5,7 +5,7 @@ import { AppError } from "./errors";
 import { outputSchema } from "./analysis";
 import { vault, encrypt, decrypt, type Vault } from "./vault";
 
-// A pinned version makes saved runs reproducible across alias updates.
+// Pin the model configuration across alias updates; outputs are not deterministic.
 export const MODEL = "gpt-5.4-2026-03-05";
 const settingsFile = "provider-settings.enc";
 const settingsSchema = z.object({ apiKey: z.string().regex(/^sk-[A-Za-z0-9_-]{16,500}$/) }).strict();
